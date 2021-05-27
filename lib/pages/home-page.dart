@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:provider/provider.dart';
-import 'package:sqlite/bloc/dog-bloc.dart';
-
+import 'package:sqlite/bloc/dog/dog_bloc.dart';
 import 'package:sqlite/model/dog.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,29 +12,24 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var dogBloc = Provider.of<DogBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Material App Bar'),
       ),
-      body: StreamBuilder(
-        stream: dogBloc.dogs,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final dogs = snapshot.data as List<Dog>;
-            return ListView.separated(
-              itemBuilder: (context, index) {
-                final dog = dogs[index];
-                return _createListTile(context, dog);
-              },
-              separatorBuilder: (_, i) => Divider(
-                height: 1,
-                color: Colors.black54,
-              ),
-              itemCount: dogs.length,
-            );
-          } else
-            return Container();
+      body: BlocBuilder<DogBloc, DogState>(
+        builder: (context, state) {
+          final dogs = state.dogs;
+          return ListView.separated(
+            itemBuilder: (context, index) {
+              final dog = dogs[index];
+              return _createListTile(context, dog);
+            },
+            separatorBuilder: (_, i) => Divider(
+              height: 1,
+              color: Colors.black54,
+            ),
+            itemCount: dogs.length,
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(
@@ -49,11 +43,10 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _createListTile(BuildContext context, Dog dog) {
-    var dataManager = Provider.of<DogBloc>(context, listen: false);
     return Dismissible(
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          dataManager.deleteById(dog.id);
+          BlocProvider.of<DogBloc>(context).add(BorrarDog(dog.id));
           return true;
         }
       },
@@ -108,7 +101,7 @@ class HomePage extends StatelessWidget {
     var ctrlNombre = TextEditingController();
     var ctrlEdad = TextEditingController();
     var ctrlId = TextEditingController();
-    var dataManager = Provider.of<DogBloc>(context, listen: false);
+
     await showDialog(
       context: context,
       builder: (context) {
@@ -118,13 +111,12 @@ class HomePage extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 if (_keyForm.currentState!.validate()) {
-                  await dataManager.add(
-                    Dog(
-                      id: int.parse(ctrlId.text),
-                      name: ctrlNombre.text,
-                      age: int.parse(ctrlEdad.text),
-                    ),
-                  );
+                  BlocProvider.of<DogBloc>(context).add(CrearDog(Dog(
+                    id: int.parse(ctrlId.text),
+                    name: ctrlNombre.text,
+                    age: int.parse(ctrlEdad.text),
+                  )));
+
                   Navigator.of(context).pop();
                 }
               },
@@ -182,7 +174,7 @@ class HomePage extends StatelessWidget {
     var ctrlNombre = TextEditingController()..text = dog.name;
     var ctrlEdad = TextEditingController()..text = dog.age.toString();
     var ctrlId = TextEditingController()..text = dog.id.toString();
-    var dataManager = Provider.of<DogBloc>(context, listen: false);
+
     await showDialog(
       context: context,
       builder: (context) {
@@ -196,13 +188,14 @@ class HomePage extends StatelessWidget {
             TextButton(
                 onPressed: () async {
                   if (_keyForm.currentState!.validate()) {
-                    await dataManager.update(
+                    BlocProvider.of<DogBloc>(context).add(ActualizarDog(
                       Dog(
                         id: dog.id,
                         name: ctrlNombre.text,
                         age: int.parse(ctrlEdad.text),
                       ),
-                    );
+                    ));
+
                     Navigator.of(context).pop();
                   }
                 },

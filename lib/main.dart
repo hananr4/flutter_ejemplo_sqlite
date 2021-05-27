@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:provider/provider.dart';
-import 'package:sqlite/bloc/dog-bloc.dart';
-
+import 'bloc/dog/dog_bloc.dart';
 import 'pages/home-page.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    MultiProvider(
+    MultiBlocProvider(
       providers: [
-        Provider(create: (_) => DogBloc()),
+        BlocProvider(create: (_) => DogBloc()..add(ObtenerTodosDogs())),
       ],
       child: MyApp(),
     ),
