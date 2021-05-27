@@ -4,7 +4,7 @@ import 'package:sqlite/model/dog.dart';
 class DogRepository {
   final dogDao = DogDao();
 
-  Future getAll({String? query}) => dogDao.getAll(query: query);
+  Future<List<Dog>> getAll({String? query}) => dogDao.getAll(query: query);
 
   Future insert(Dog dog) => dogDao.create(dog);
 
