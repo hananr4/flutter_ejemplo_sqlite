@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:sqlite/bloc/dog-bloc.dart';
 
-import 'package:sqlite/data/dog-provider.dart';
 import 'package:sqlite/model/dog.dart';
 
 class HomePage extends StatelessWidget {
@@ -13,15 +13,13 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var dataManager = Provider.of<DogManager>(context);
-    var dogs = dataManager.dogs();
+    var dogBloc = Provider.of<DogBloc>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Material App Bar'),
       ),
-      body: FutureBuilder(
-        future: dogs,
-        // initialData: <Dog>[],
+      body: StreamBuilder(
+        stream: dogBloc.dogs,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final dogs = snapshot.data as List<Dog>;
@@ -51,11 +49,11 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _createListTile(BuildContext context, Dog dog) {
-    var dataManager = Provider.of<DogManager>(context, listen: false);
+    var dataManager = Provider.of<DogBloc>(context, listen: false);
     return Dismissible(
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          dataManager.deleteDog(dog.id);
+          dataManager.deleteById(dog.id);
           return true;
         }
       },
@@ -110,7 +108,7 @@ class HomePage extends StatelessWidget {
     var ctrlNombre = TextEditingController();
     var ctrlEdad = TextEditingController();
     var ctrlId = TextEditingController();
-    var dataManager = Provider.of<DogManager>(context, listen: false);
+    var dataManager = Provider.of<DogBloc>(context, listen: false);
     await showDialog(
       context: context,
       builder: (context) {
@@ -120,7 +118,7 @@ class HomePage extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 if (_keyForm.currentState!.validate()) {
-                  await dataManager.insertDog(
+                  await dataManager.add(
                     Dog(
                       id: int.parse(ctrlId.text),
                       name: ctrlNombre.text,
@@ -184,7 +182,7 @@ class HomePage extends StatelessWidget {
     var ctrlNombre = TextEditingController()..text = dog.name;
     var ctrlEdad = TextEditingController()..text = dog.age.toString();
     var ctrlId = TextEditingController()..text = dog.id.toString();
-    var dataManager = Provider.of<DogManager>(context, listen: false);
+    var dataManager = Provider.of<DogBloc>(context, listen: false);
     await showDialog(
       context: context,
       builder: (context) {
@@ -198,7 +196,7 @@ class HomePage extends StatelessWidget {
             TextButton(
                 onPressed: () async {
                   if (_keyForm.currentState!.validate()) {
-                    await dataManager.updateDog(
+                    await dataManager.update(
                       Dog(
                         id: dog.id,
                         name: ctrlNombre.text,

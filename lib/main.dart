@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:sqlite/bloc/dog-bloc.dart';
 
-import 'data/dog-provider.dart';
 import 'pages/home-page.dart';
 
 void main() {
@@ -11,7 +11,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => DogManager()),
+        Provider(create: (_) => DogBloc()),
       ],
       child: MyApp(),
     ),
@@ -21,8 +21,6 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Provider.of<DogManager>(context)..init();
-
     return MaterialApp(
       title: 'Material App',
       home: HomePage(),
